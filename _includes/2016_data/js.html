@@ -13,7 +13,8 @@
 <script>
 $(function() {
 
-  $(window).scroll(function() {
+  // Show/hide Return to Top button
+  $(window).on('scroll', function() {
     if ($(this).scrollTop() > 300) {
       $('#backToTop').addClass('show');
     } else {
@@ -21,18 +22,14 @@ $(function() {
     }
   });
 
+  // Smoothly return to top
   $('#backToTop').on('click', function(event) {
     event.preventDefault();
 
-    document.documentElement.style.scrollBehavior = 'auto';
-
-    $('html, body').stop(true).animate({
-      scrollTop: 0
-    }, 300);
-
-    setTimeout(function() {
-      document.documentElement.style.scrollBehavior = 'smooth';
-    }, 200);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   });
 
 });
