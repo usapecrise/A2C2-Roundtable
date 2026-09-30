@@ -1,8 +1,9 @@
 title: "APEC Alliance for Supply Chain Connectivity Regional Roundtable"
+
 description: >
   Advancing Supply Chain Traceability, Customs Efficiency, and Resilience
 
-baseurl: "//A2C2-Roundtable-Website"
+baseurl: "/A2C2-Roundtable-Website"
 url: "https://usapecrise.github.io"
 
 markdown: kramdown
@@ -13,7 +14,9 @@ social: []
 
 google_site_verification: googleXXXXXXXXXXXXXXXX.html
 
-include: ['_2016_pages', '_2017_pages']
+include:
+  - _2016_pages
+  - _2017_pages
 
 plugins:
   - jekyll-sitemap
