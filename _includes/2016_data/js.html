@@ -1,109 +1,257 @@
-<!-- jQuery (FIXED - use CDN so it ALWAYS works) -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
 
 <!-- Bootstrap Core JavaScript -->
-<script src="{{ "../css/2016_style/js/bootstrap.min.js" | prepend: site.baseurl }}"></script>
+<script src="{{ '../css/2016_style/js/bootstrap.min.js' | prepend: site.baseurl }}"></script>
 
 <!-- Plugin JavaScript -->
-<script src="{{ "../css/2016_style/js/jquery.easing.min.js" | prepend: site.baseurl }}"></script>
-<script src="{{ "../css/2016_style/js/classie.js" | prepend: site.baseurl }}"></script>
-<script src="{{ "../css/2016_style/js/cbpAnimatedHeader.js" | prepend: site.baseurl }}"></script>
+<script src="{{ '../css/2016_style/js/jquery.easing.min.js' | prepend: site.baseurl }}"></script>
+<script src="{{ '../css/2016_style/js/classie.js' | prepend: site.baseurl }}"></script>
+<script src="{{ '../css/2016_style/js/cbpAnimatedHeader.js' | prepend: site.baseurl }}"></script>
 
 
 <script>
-$(function() {
+document.addEventListener('DOMContentLoaded', function () {
 
-  // Show/hide Return to Top button
-  $(window).on('scroll', function() {
-    if ($(this).scrollTop() > 300) {
-      $('#backToTop').addClass('show');
+  const backToTop = document.getElementById('backToTop');
+  const navbar = document.querySelector('.navbar-default');
+  const intro = document.getElementById('intro');
+  const sections = document.querySelectorAll('section[id]');
+
+  let returningToTop = false;
+
+
+  /* =========================================================
+     RETURN TO TOP — SHOW / HIDE
+  ========================================================= */
+
+  function updateBackToTop() {
+    if (!backToTop) return;
+
+    if (window.scrollY > 300) {
+      backToTop.classList.add('show');
     } else {
-      $('#backToTop').removeClass('show');
+      backToTop.classList.remove('show');
     }
-  });
-
-  // Smoothly return to top
-  $('#backToTop').on('click', function(event) {
-    event.preventDefault();
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  });
-
-});
-</script>
-
-<script>
-$(window).scroll(function() {
-  var trigger = $('#intro').height();
-
-  if ($(this).scrollTop() > trigger + 60) {
-    $('.navbar-default').addClass('navbar-shrink');
-  } else {
-    $('.navbar-default').removeClass('navbar-shrink');
   }
-});
-</script>
 
-<script>
-$(document).on('click', '.speaker-toggle', function(e) {
-  e.stopPropagation();
 
-  var $currentRow = $(this).closest('.speaker-row');
+  /* =========================================================
+     RETURN TO TOP
+  ========================================================= */
 
-  // Close all others
-  $('.speaker-row').not($currentRow).removeClass('active');
-  $('.speaker-row').not($currentRow).find('.speaker-toggle').text('View full bio →');
+  if (backToTop) {
+    backToTop.addEventListener('click', function (event) {
+      event.preventDefault();
 
-  // Toggle current
-  $currentRow.toggleClass('active');
+      returningToTop = true;
 
-  // Update button text
-  if ($currentRow.hasClass('active')) {
-    $(this).text('Hide bio ↑');
-  } else {
-    $(this).text('View full bio →');
-  }
-});
-</script>
-
-<script>
-document.querySelectorAll('a.page-scroll').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
-    e.preventDefault();  //
-
-    const target = document.querySelector(this.getAttribute('href'));
-    if (!target) return;
-
-    target.scrollIntoView({
-      behavior: 'smooth'
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     });
-  });
-});
-</script>
+  }
 
-<script>
-const sections = document.querySelectorAll("section[id]");
 
-window.addEventListener("scroll", () => {
-  let current = "";
+  /* =========================================================
+     NAVBAR SHRINK
+  ========================================================= */
 
-  sections.forEach(section => {
-    const top = section.offsetTop - 120;
+  function updateNavbar() {
+    if (!navbar || !intro) return;
 
-    if (window.scrollY >= top) {
-      current = section.id;
+    const trigger = intro.offsetHeight + 60;
+
+    if (window.scrollY > trigger) {
+      navbar.classList.add('navbar-shrink');
+    } else {
+      navbar.classList.remove('navbar-shrink');
     }
+  }
+
+
+  /* =========================================================
+     PAGE-SCROLL LINKS
+  ========================================================= */
+
+  document.querySelectorAll('a.page-scroll').forEach(function (anchor) {
+
+    anchor.addEventListener('click', function (event) {
+
+      const href = this.getAttribute('href');
+
+      /*
+       * Ignore links that don't point to an element
+       * on the current page.
+       */
+      if (!href || href.charAt(0) !== '#') {
+        return;
+      }
+
+      const target = document.querySelector(href);
+
+      if (!target) {
+        return;
+      }
+
+      event.preventDefault();
+
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+    });
+
   });
 
-  if (current) {
-    history.replaceState(null, "", "#" + current);
+
+  /* =========================================================
+     ACTIVE SECTION / URL HASH
+  ========================================================= */
+
+  function updateSectionHash() {
+
+    /*
+     * IMPORTANT:
+     * Do not change the URL while the browser is
+     * smoothly returning to the top.
+     */
+    if (returningToTop) {
+
+      if (window.scrollY <= 5) {
+
+        returningToTop = false;
+
+        /*
+         * We're back on the landing/hero section,
+         * so remove #intro, #contact, etc. from URL.
+         */
+        history.replaceState(
+          null,
+          '',
+          window.location.pathname + window.location.search
+        );
+      }
+
+      return;
+    }
+
+
+    /*
+     * Hero area — don't show a section hash.
+     */
+    if (intro && window.scrollY < intro.offsetTop - 120) {
+
+      if (window.location.hash) {
+        history.replaceState(
+          null,
+          '',
+          window.location.pathname + window.location.search
+        );
+      }
+
+      return;
+    }
+
+
+    /*
+     * Determine which section is currently active.
+     */
+    let current = '';
+
+    sections.forEach(function (section) {
+
+      const sectionTop = section.offsetTop - 120;
+
+      if (window.scrollY >= sectionTop) {
+        current = section.id;
+      }
+
+    });
+
+
+    /*
+     * Only update the URL when necessary.
+     */
+    if (
+      current &&
+      window.location.hash !== '#' + current
+    ) {
+      history.replaceState(
+        null,
+        '',
+        '#' + current
+      );
+    }
+
   }
+
+
+  /* =========================================================
+     MAIN SCROLL HANDLER
+  ========================================================= */
+
+  window.addEventListener('scroll', function () {
+    updateBackToTop();
+    updateNavbar();
+    updateSectionHash();
+  }, { passive: true });
+
+
+  /* Run once when page loads */
+  updateBackToTop();
+  updateNavbar();
+
+
+  /* =========================================================
+     SPEAKER BIOS
+  ========================================================= */
+
+  document.querySelectorAll('.speaker-toggle').forEach(function (toggle) {
+
+    toggle.addEventListener('click', function (event) {
+
+      event.stopPropagation();
+
+      const currentRow = this.closest('.speaker-row');
+
+      if (!currentRow) return;
+
+
+      /* Close other speaker bios */
+      document.querySelectorAll('.speaker-row').forEach(function (row) {
+
+        if (row !== currentRow) {
+
+          row.classList.remove('active');
+
+          const otherToggle = row.querySelector('.speaker-toggle');
+
+          if (otherToggle) {
+            otherToggle.textContent = 'View full bio →';
+          }
+
+        }
+
+      });
+
+
+      /* Toggle selected bio */
+      currentRow.classList.toggle('active');
+
+
+      /* Update button text */
+      if (currentRow.classList.contains('active')) {
+        this.textContent = 'Hide bio ↑';
+      } else {
+        this.textContent = 'View full bio →';
+      }
+
+    });
+
+  });
+
 });
 </script>
-
-
-
-
